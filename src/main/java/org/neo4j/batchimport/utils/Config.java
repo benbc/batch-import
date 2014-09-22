@@ -126,7 +126,7 @@ public class Config {
         return config;
     }
 
-    public static Collection<LegacyIndexInfo> extractIndexInfos(Map<String, String> config) {
+    public static Collection<LegacyIndexInfo> extractLegacyIndexInfos( Map<String, String> config ) {
         Collection<LegacyIndexInfo>  result=new ArrayList<LegacyIndexInfo>();
         for (Map.Entry<String, String> entry : config.entrySet()) {
             final LegacyIndexInfo info = LegacyIndexInfo.fromConfigEntry( entry );
@@ -165,7 +165,7 @@ public class Config {
     }
 
     public Collection<LegacyIndexInfo> getLegacyIndexInfos() {
-        return extractIndexInfos(configData);
+        return extractLegacyIndexInfos( configData );
     }
 
     public Collection<File> getRelsFiles() {
