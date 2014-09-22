@@ -1,4 +1,4 @@
-package org.neo4j.batchimport.index;
+package org.neo4j.batchimport.legacyindex;
 
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.index.IndexHits;

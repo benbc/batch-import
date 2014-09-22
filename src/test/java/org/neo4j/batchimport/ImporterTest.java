@@ -3,10 +3,9 @@ package org.neo4j.batchimport;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
-import org.neo4j.batchimport.index.LongIterableIndexHits;
+import org.neo4j.batchimport.legacyindex.LongIterableIndexHits;
 import org.neo4j.batchimport.utils.Config;
 import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.index.lucene.unsafe.batchinsert.LuceneBatchInserterIndexProvider;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
@@ -40,7 +39,7 @@ public class ImporterTest {
         when(provider.nodeIndex(eq("index-a"),anyMap())).thenReturn(index);
 
         final Map<String, String> configData = Config.config("batch.properties");
-        new IndexInfo("node_index", "index-a", "exact", null).addToConfig(configData);
+        new LegacyIndexInfo("node_index", "index-a", "exact", null).addToConfig(configData);
         importer = new Importer(File.createTempFile("test", "db"), new Config(configData)) {
             @Override
             protected BatchInserter createBatchInserter(File graphDb, Config config) {

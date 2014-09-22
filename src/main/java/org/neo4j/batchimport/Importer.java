@@ -4,7 +4,7 @@ import org.neo4j.batchimport.importer.ChunkerLineData;
 import org.neo4j.batchimport.importer.CsvLineData;
 import org.neo4j.batchimport.importer.RelType;
 import org.neo4j.batchimport.importer.Type;
-import org.neo4j.batchimport.index.MapDbCachingIndexProvider;
+import org.neo4j.batchimport.legacyindex.MapDbCachingIndexProvider;
 import org.neo4j.batchimport.utils.Config;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.Label;
@@ -32,7 +32,7 @@ public class Importer {
     private final Config config;
     private BatchInserter db;
     private BatchInserterIndexProvider indexProvider;
-    Map<String,BatchInserterIndex> indexes=new HashMap<String, BatchInserterIndex>();
+    Map<String,BatchInserterIndex> legacyIndexes =new HashMap<>();
     private Label[] labelsArray = NO_LABELS;
 
     public Importer(File graphDb, final Config config) {
@@ -41,11 +41,12 @@ public class Importer {
 
         final boolean luceneOnlyIndex = config.isCachedIndexDisabled();
         indexProvider = createIndexProvider(luceneOnlyIndex);
-        Collection<IndexInfo> indexInfos = config.getIndexInfos();
-        if (indexInfos!=null) {
-            for (IndexInfo indexInfo : indexInfos) {
-                BatchInserterIndex index = indexInfo.isNodeIndex() ? nodeIndexFor(indexInfo.indexName, indexInfo.indexType) : relationshipIndexFor(indexInfo.indexName, indexInfo.indexType);
-                indexes.put(indexInfo.indexName, index);
+        Collection<LegacyIndexInfo> legacyIndexInfos = config.getLegacyIndexInfos();
+        if ( legacyIndexInfos !=null) {
+            for (LegacyIndexInfo legacyIndexInfo : legacyIndexInfos ) {
+                BatchInserterIndex index = legacyIndexInfo.isNodeIndex() ? nodeIndexFor( legacyIndexInfo.indexName,
+                        legacyIndexInfo.indexType) : relationshipIndexFor( legacyIndexInfo.indexName, legacyIndexInfo.indexType);
+                legacyIndexes.put( legacyIndexInfo.indexName, index );
             }
         }
 
@@ -132,7 +133,7 @@ public class Importer {
     }
 
     private BatchInserterIndex indexFor(String index) {
-        return indexes.get(index);
+        return legacyIndexes.get(index);
     }
 
     void importRelationships(Reader reader) throws IOException {
@@ -163,7 +164,7 @@ public class Importer {
     }
 
     private void flushIndexes() {
-        for (BatchInserterIndex index : indexes.values()) {
+        for (BatchInserterIndex index : legacyIndexes.values()) {
             index.flush();
         }
     }
@@ -213,13 +214,13 @@ public class Importer {
         return Long.parseLong(id.toString());
     }
 
-    private void importIndex(IndexInfo indexInfo) throws IOException {
-        File indexFile = new File(indexInfo.indexFileName);
+    private void importLegacyIndex( LegacyIndexInfo legacyIndexInfo ) throws IOException {
+        File indexFile = new File( legacyIndexInfo.indexFileName);
         if (!indexFile.exists()) {
             System.err.println("Index file "+indexFile+" does not exist");
             return;
         }
-        importIndex(indexInfo.indexName, indexes.get(indexInfo.indexName), createFileReader(indexFile));
+        importIndex( legacyIndexInfo.indexName, legacyIndexes.get( legacyIndexInfo.indexName), createFileReader(indexFile));
     }
 
     private void doImport() throws IOException {
@@ -232,8 +233,8 @@ public class Importer {
                 importRelationships(createFileReader(file));
             }
 
-            for (IndexInfo indexInfo : config.getIndexInfos()) {
-                if (indexInfo.shouldImportFile()) importIndex(indexInfo);
+            for (LegacyIndexInfo legacyIndexInfo : config.getLegacyIndexInfos()) {
+                if (legacyIndexInfo.shouldImportFile()) importLegacyIndex( legacyIndexInfo );
             }
 		} finally {
             finish();

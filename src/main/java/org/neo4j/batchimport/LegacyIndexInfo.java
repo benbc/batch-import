@@ -2,20 +2,23 @@ package org.neo4j.batchimport;
 
 import java.io.File;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
 * @author mh
 * @since 11.06.13
 */
-public class IndexInfo {
-    public IndexInfo(String[] args, int offset) {
+public class LegacyIndexInfo
+{
+    public LegacyIndexInfo( String[] args, int offset ) {
         this.elementType = args[offset];
         this.indexName = args[offset+1];
         this.indexType = args[offset+2];
         this.indexFileName = args[offset+3];
     }
 
-    public IndexInfo(String elementType, String indexName, String indexType, String indexFileName) {
+    public LegacyIndexInfo( String elementType, String indexName, String indexType, String indexFileName ) {
         if (!(elementType.equals("node_index") || elementType.equals("relationship_index"))) throw new IllegalArgumentException("ElementType has to be node_index or relationship_index, but is "+elementType);
         if (!(indexType.equals("exact") || indexType.equals("fulltext"))) throw new IllegalArgumentException("IndexType has to be exact or fulltext, but is "+indexType);
         this.elementType = elementType;
@@ -26,15 +29,16 @@ public class IndexInfo {
 
     public final String elementType, indexName, indexType, indexFileName;
 
-    public static IndexInfo fromConfigEntry(Map.Entry<String, String> entry) {
-        if (!entry.getKey().matches("^batch_import\\.(node|relationship)_index\\..+")) return null;
-        final String[] keyParts = entry.getKey().split("\\.", 3);
-        final String elementType = keyParts[1];
-        final String indexName = keyParts[2];
+    public static LegacyIndexInfo fromConfigEntry(Map.Entry<String, String> entry) {
+        Pattern pattern = Pattern.compile( "^batch_import(\\.legacy)?\\.(node_index|relationship_index)\\.(.+)" );
+        Matcher matcher = pattern.matcher( entry.getKey() );
+        if (!matcher.matches()) return null;
+        final String elementType = matcher.group( 2 );
+        final String indexName = matcher.group( 3 );
         final String[] valueParts = entry.getValue().split(":");
         final String indexType = valueParts[0];
         final String indexFileName = valueParts.length > 1 ? valueParts[1] : null;
-        return new IndexInfo(elementType,indexName,indexType,indexFileName);
+        return new LegacyIndexInfo(elementType,indexName,indexType,indexFileName);
     }
 
     public boolean isNodeIndex() {
@@ -42,7 +46,7 @@ public class IndexInfo {
     }
 
     public String getConfigKey() {
-        return "batch_import."+elementType+"."+indexName;
+        return "batch_import.legacy."+elementType+"."+indexName;
     }
 
     public String getConfigValue() {

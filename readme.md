@@ -32,7 +32,7 @@ Example data for the files is a small family network
 * There is a separate "label" type, which should be used for relationship types and/or node labels, (`labels:label`)
 * Property fields may also be arrays by adding "_array" to the types above and separating the data with commas.
 * for non-ascii characters make sure to add `-Dfile.encoding=UTF-8` to the commandline arguments
-* Optionally automatic indexing of properties can be configured with a header like `name:string:users` and a configured index in `batch.properties` like `batch_import.node_index=exact`
+* Optionally legacy indexing of properties can be configured with a header like `name:string:users` and a configured index in `batch.properties` like `batch_import.legacy.node_index=exact`
   then the property `name` will be indexed in the `users` index for each row with a value there
 * multiple files for nodes and rels, comma separated, without spaces like "node1.csv,node2.csv"
 * you can specify concrete, externally provided node-id's with: `i:id`, both in the node and relationship-files

@@ -1,7 +1,7 @@
 package org.neo4j.batchimport.utils;
 
 import org.neo4j.batchimport.Importer;
-import org.neo4j.batchimport.IndexInfo;
+import org.neo4j.batchimport.LegacyIndexInfo;
 import org.neo4j.helpers.collection.MapUtil;
 
 import java.io.File;
@@ -69,12 +69,12 @@ public class Config {
         if (!config.containsKey(BATCH_IMPORT_GRAPH_DB)) throw new IllegalArgumentException("Missing parameter for graphdb directory");
     }
 
-    private static Collection<IndexInfo> convertParamsToConfig(Stack<String> args, Map<String, String> config) {
+    private static Collection<LegacyIndexInfo> convertParamsToConfig(Stack<String> args, Map<String, String> config) {
         addConfigParamIfArgument(args, config, BATCH_IMPORT_GRAPH_DB);
         addConfigParamIfArgument(args, config, BATCH_IMPORT_NODES_FILES);
         addConfigParamIfArgument(args, config, BATCH_IMPORT_RELS_FILES);
-        Collection<IndexInfo> indexes = createIndexInfos(args);
-        for (IndexInfo index : indexes) {
+        Collection<LegacyIndexInfo> indexes = createLegacyIndexInfos( args );
+        for (LegacyIndexInfo index : indexes) {
             index.addToConfig(config);
         }
         return indexes;
@@ -91,10 +91,10 @@ public class Config {
         return args.pop();
     }
 
-    private static Collection<IndexInfo> createIndexInfos(Stack<String> args) {
-        Collection<IndexInfo> indexes=new ArrayList<IndexInfo>();
+    private static Collection<LegacyIndexInfo> createLegacyIndexInfos( Stack<String> args ) {
+        Collection<LegacyIndexInfo> indexes=new ArrayList<LegacyIndexInfo>();
         while (!args.isEmpty()) {
-            indexes.add(new IndexInfo(popOrNull(args), popOrNull(args), popOrNull(args), popOrNull(args)));
+            indexes.add(new LegacyIndexInfo(popOrNull(args), popOrNull(args), popOrNull(args), popOrNull(args)));
         }
         return indexes;
     }
@@ -126,10 +126,10 @@ public class Config {
         return config;
     }
 
-    public static Collection<IndexInfo> extractIndexInfos(Map<String, String> config) {
-        Collection<IndexInfo>  result=new ArrayList<IndexInfo>();
+    public static Collection<LegacyIndexInfo> extractIndexInfos(Map<String, String> config) {
+        Collection<LegacyIndexInfo>  result=new ArrayList<LegacyIndexInfo>();
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            final IndexInfo info = IndexInfo.fromConfigEntry(entry);
+            final LegacyIndexInfo info = LegacyIndexInfo.fromConfigEntry( entry );
             if (info!=null) result.add(info);
         }
         return result;
@@ -154,17 +154,17 @@ public class Config {
     }
 
     public static String NODE_INDEX(String indexName) {
-        return "batch_import.node_index." + indexName;
+        return "batch_import.legacy.node_index." + indexName;
     }
     public static String RELATIONSHIP_INDEX(String indexName) {
-        return "batch_import.relationship_index." + indexName;
+        return "batch_import.legacy.relationship_index." + indexName;
     }
 
     public boolean isCachedIndexDisabled() {
         return configOptionEnabled(this, BATCH_IMPORT_MAPDB_CACHE_DISABLE);
     }
 
-    public Collection<IndexInfo> getIndexInfos() {
+    public Collection<LegacyIndexInfo> getLegacyIndexInfos() {
         return extractIndexInfos(configData);
     }
 

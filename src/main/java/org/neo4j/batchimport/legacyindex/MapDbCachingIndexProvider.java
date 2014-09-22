@@ -1,4 +1,4 @@
-package org.neo4j.batchimport.index;
+package org.neo4j.batchimport.legacyindex;
 
 import org.mapdb.BTreeKeySerializer;
 import org.mapdb.Bind;
