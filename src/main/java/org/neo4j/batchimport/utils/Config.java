@@ -2,6 +2,7 @@ package org.neo4j.batchimport.utils;
 
 import org.neo4j.batchimport.Importer;
 import org.neo4j.batchimport.LegacyIndexInfo;
+import org.neo4j.batchimport.SchemaEntry;
 import org.neo4j.helpers.collection.MapUtil;
 
 import java.io.File;
@@ -135,6 +136,15 @@ public class Config {
         return result;
     }
 
+    public static Collection<SchemaEntry> extractSchemaEntries( Map<String, String> config ) {
+        Collection<SchemaEntry> result = new ArrayList<>();
+        for (Map.Entry<String, String> entry : config.entrySet()) {
+            final SchemaEntry info = SchemaEntry.fromConfigEntry( entry );
+            if (info != null) result.add(info);
+        }
+        return result;
+    }
+
     public static boolean configOptionEnabled(Config config, String option) {
         return "true".equalsIgnoreCase(config.get(option));
     }
@@ -166,6 +176,10 @@ public class Config {
 
     public Collection<LegacyIndexInfo> getLegacyIndexInfos() {
         return extractLegacyIndexInfos( configData );
+    }
+
+    public Collection<SchemaEntry> getSchemaEntries() {
+        return extractSchemaEntries( configData );
     }
 
     public Collection<File> getRelsFiles() {

@@ -236,7 +236,12 @@ public class Importer {
             for (LegacyIndexInfo legacyIndexInfo : config.getLegacyIndexInfos()) {
                 if (legacyIndexInfo.shouldImportFile()) importLegacyIndex( legacyIndexInfo );
             }
-		} finally {
+
+            for ( SchemaEntry schemaEntry : config.getSchemaEntries() )
+            {
+                schemaEntry.type.create( schemaEntry, db );
+            }
+        } finally {
             finish();
         }
     }
